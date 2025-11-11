@@ -9,12 +9,25 @@ class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'total_amount',
-        'cash_received',
-        'change_amount',
-    ];
+
+protected $fillable = [
+    'tenant_id',
+    'branch_id',
+    'user_id',
+    'total_amount',
+    'cash_received',
+    'change_amount',
+];
+
+protected static function booted()
+{
+    static::creating(function ($sale) {
+        if (auth()->check() && !$sale->tenant_id) {
+            $sale->tenant_id = auth()->user()->tenant_id;
+            $sale->branch_id = auth()->user()->branch_id;
+        }
+    });
+}
 
     public function user()
     {

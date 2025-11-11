@@ -13,18 +13,31 @@ class Product extends Model
     protected $primaryKey = 'product_id';
 
     protected $fillable = [
-        'name',
-        'quantity',
-        'unit',
-        'manufacturer',
-        'price',
-        'capital_price',
-        'date_procured',
-        'expiration_date',
-        'manufactured_date',
-        'is_active',
-        'sold_quantity',
-    ];
+    'tenant_id',
+    'branch_id',
+    'name',
+    'quantity',
+    'unit',
+    'manufacturer',
+    'price',
+    'capital_price',
+    'date_procured',
+    'expiration_date',
+    'manufactured_date',
+    'is_active',
+    'sold_quantity',
+];
+
+protected static function booted()
+{
+    static::creating(function ($product) {
+        if (auth()->check() && !$product->tenant_id) {
+            $product->tenant_id = auth()->user()->tenant_id;
+            $product->branch_id = auth()->user()->branch_id;
+        }
+    });
+}
+
 
     protected function casts(): array
     {

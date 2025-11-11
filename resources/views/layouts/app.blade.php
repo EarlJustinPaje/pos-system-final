@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS & Inventory System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -39,6 +39,7 @@
             z-index: 1000;
             border-right: 1px solid var(--border-color);
             box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+            overflow-y: auto;
         }
         
         .main-content {
@@ -202,6 +203,10 @@
             font-size: 0.9rem;
         }
 
+        .table-dark td {
+            border-color: var(--border-color);
+        }
+
         .dropdown-menu {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -252,6 +257,10 @@
             color: var(--text-primary);
         }
 
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
         .page-title {
             font-size: 2rem;
             font-weight: 800;
@@ -287,11 +296,33 @@
             margin-bottom: 30px;
         }
 
+        .badge {
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .btn-group .btn {
+            margin: 0 2px;
+        }
+
+        code {
+            background: var(--darker-bg);
+            color: var(--reddit-orange);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
             }
             
             .main-content {
@@ -301,6 +332,85 @@
             .navbar {
                 left: 0;
             }
+
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--reddit-orange);
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Custom Badge Colors */
+        .badge.bg-reddit {
+            background-color: var(--reddit-orange) !important;
+        }
+
+        /* Pagination */
+        .pagination {
+            --bs-pagination-bg: var(--card-bg);
+            --bs-pagination-border-color: var(--border-color);
+            --bs-pagination-hover-bg: rgba(255, 69, 0, 0.1);
+            --bs-pagination-hover-border-color: var(--reddit-orange);
+            --bs-pagination-active-bg: var(--reddit-orange);
+            --bs-pagination-active-border-color: var(--reddit-orange);
+        }
+
+        /* Modal */
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Form Labels */
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Invalid Feedback */
+        .invalid-feedback {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
         }
     </style>
 </head>
@@ -308,14 +418,31 @@
     <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <span class="navbar-brand fw-bold fs-4">Dashboard Overview</span>
+            <button class="btn btn-link d-md-none text-white me-3" id="sidebarToggle">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            
+            <span class="navbar-brand fw-bold fs-4">
+                @if(auth()->user()->isSuperAdmin())
+                    Super Admin Panel
+                @elseif(auth()->user()->isAdmin())
+                    Admin Dashboard
+                @elseif(auth()->user()->isManager())
+                    Manager Dashboard
+                @else
+                    POS Terminal
+                @endif
+            </span>
             
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle me-2 fs-5"></i>
-                    <span class="fw-semibold">{{ Auth::user()->name ?? Auth::user()->username }}</span>
+                    <span class="fw-semibold d-none d-md-inline">{{ Auth::user()->name ?? Auth::user()->username }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="px-3 py-2 border-bottom border-secondary">
+                        <small class="text-muted">Role: <strong class="text-reddit">{{ ucfirst(auth()->user()->role) }}</strong></small>
+                    </li>
                     <li><a class="dropdown-item" href="{{ route('users.show', Auth::user()) }}"><i class="bi bi-person me-2"></i>Profile</a></li>
                     <li><a class="dropdown-item" href="{{ route('users.edit', Auth::user()) }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
                     <li><hr class="dropdown-divider"></li>
@@ -331,9 +458,9 @@
     </nav>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <a href="{{ route('home') }}" class="sidebar-brand text-decoration-none">
-            <i class="bi bi-shop me-2"></i>My Dashboard
+            <i class="bi bi-shop me-2"></i>POS System
         </a>
         
         <nav class="nav flex-column">
@@ -342,17 +469,32 @@
             <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
+
+            @if(auth()->user()->isSuperAdmin())
+            <a class="nav-link {{ request()->routeIs('super-admin.tenants.*') ? 'active' : '' }}" href="{{ route('super-admin.tenants.index') }}">
+                <i class="bi bi-building"></i> Tenants
+            </a>
+            @endif
+
+            @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+            <a class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}" href="{{ route('branches.index') }}">
+                <i class="bi bi-diagram-3"></i> Branches
+            </a>
+            @endif
+            
             <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}" href="{{ route('pos.index') }}">
                 <i class="bi bi-cart3"></i> POS
             </a>
+
+            @if(!auth()->user()->isCashier())
             <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
                 <i class="bi bi-box-seam"></i> Products
             </a>
+            
             <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                 <i class="bi bi-people"></i> Users
             </a>
             
-            <!-- Reports Dropdown -->
             <div class="dropdown dropend">
                 <a class="nav-link dropdown-toggle {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
                    href="#" role="button" data-bs-toggle="dropdown">
@@ -364,8 +506,9 @@
                     <li><a class="dropdown-item" href="{{ route('reports.inventory') }}">Inventory</a></li>
                 </ul>
             </div>
+            @endif
             
-            @if(Auth::user()->is_admin)
+            @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
             <a class="nav-link {{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}">
                 <i class="bi bi-journal-text"></i> Audit Trail
             </a>
@@ -389,18 +532,47 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             
             @yield('content')
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.getElementById('sidebarToggle');
+            
+            if (window.innerWidth <= 768 && sidebar && toggle) {
+                if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
+
         // Set CSRF token for AJAX requests
         if (typeof $ !== 'undefined') {
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             });
         }
