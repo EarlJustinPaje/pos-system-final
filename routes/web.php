@@ -21,6 +21,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])->name('register.perform');
 });
 
+Route::middleware(['auth', 'tenant', 'role:super_admin,admin'])->group(function () {
+    Route::resource('users', UserController::class)->except(['create', 'store']); 
+    // or include 'destroy' explicitly if you want:
+    // Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
+
+
+Route::middleware('role:super_admin,admin,manager')->group(function () {
+    Route::resource('products', ProductController::class);
+    Route::post('products/{product}/deactivate', [ProductController::class, 'deactivate'])->name('products.deactivate');
+    
+    // Import routes
+    Route::get('products-import', [ProductController::class, 'showImport'])->name('products.import');
+    Route::get('products-template', [ProductController::class, 'downloadTemplate'])->name('products.template');
+    Route::post('products-import', [ProductController::class, 'import'])->name('products.import.process');
+    
+    // ... rest of routes
+});
+
 // Authenticated routes
 Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');

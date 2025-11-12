@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+<<<<<<< HEAD
         Schema::create('users', function (Blueprint $table) {
             $table->id()->primary(); // Primary key
             $table->string('name')->nullable(); // Make 'name' optional
@@ -21,6 +22,19 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+=======
+    Schema::create('users', function (Blueprint $table) {
+    $table->id(); // just this — no ->primary()
+    $table->string('name')->nullable();
+    $table->string('email')->unique();
+    $table->string('username')->unique();
+    $table->timestamp('email_verified_at')->nullable();
+    $table->string('password');
+    $table->rememberToken();
+    $table->timestamps();
+});
+
+>>>>>>> 54ab4ca (Ready for Debugging)
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

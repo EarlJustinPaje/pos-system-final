@@ -464,6 +464,7 @@
         </a>
         
         <nav class="nav flex-column">
+<<<<<<< HEAD
             <span class="text-uppercase text-muted px-4 py-2 fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">MENU</span>
             
             <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
@@ -515,6 +516,71 @@
             @endif
         </nav>
     </div>
+=======
+    <span class="text-uppercase text-muted px-4 py-2 fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">MENU</span>
+    
+    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    {{-- Super Admin Only --}}
+    @if(auth()->user()->isSuperAdmin())
+    <a class="nav-link {{ request()->routeIs('super-admin.tenants.*') ? 'active' : '' }}" href="{{ route('super-admin.tenants.index') }}">
+        <i class="bi bi-building"></i> Tenants
+    </a>
+    @endif
+
+    {{-- Admin Only --}}
+    @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+    <a class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}" href="{{ route('branches.index') }}">
+        <i class="bi bi-diagram-3"></i> Branches
+    </a>
+    @endif
+    
+    {{-- All Users --}}
+    <a class="nav-link {{ request()->routeIs('pos.*') ? 'active' : '' }}" href="{{ route('pos.index') }}">
+        <i class="bi bi-cart3"></i> POS
+    </a>
+
+    {{-- Manager and Admin Only --}}
+    @if(auth()->user()->isManager() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+    <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
+        <i class="bi bi-box-seam"></i> Products
+    </a>
+    @endif
+    
+    {{-- Manager and Admin Only --}}
+    @if(auth()->user()->isManager() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+        <i class="bi bi-people"></i> Users
+    </a>
+    
+    <li class="nav-item">
+    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
+       href="#reportsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="reportsSubmenu">
+        <span><i class="bi bi-graph-up"></i> Reports</span>
+        <i class="bi bi-chevron-down small"></i>
+    </a>
+    <div class="collapse {{ request()->routeIs('reports.*') ? 'show' : '' }}" id="reportsSubmenu">
+        <nav class="nav flex-column ms-3">
+            <a class="nav-link {{ request()->routeIs('reports.sales') ? 'active' : '' }}" href="{{ route('reports.sales') }}">Sales Report</a>
+            <a class="nav-link {{ request()->routeIs('reports.item-sales') ? 'active' : '' }}" href="{{ route('reports.item-sales') }}">Item Sales</a>
+            <a class="nav-link {{ request()->routeIs('reports.inventory') ? 'active' : '' }}" href="{{ route('reports.inventory') }}">Inventory</a>
+        </nav>
+    </div>
+</li>
+
+    @endif
+    
+    {{-- Super Admin and Admin Only --}}
+    @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+    <a class="nav-link {{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}">
+        <i class="bi bi-journal-text"></i> Audit Trail
+    </a>
+    @endif
+</nav>
+    </div>
+>>>>>>> 54ab4ca (Ready for Debugging)
 
     <!-- Main Content -->
     <div class="main-content" style="padding-top: 90px;">

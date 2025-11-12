@@ -11,7 +11,14 @@ class AuditController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+<<<<<<< HEAD
         $this->middleware('admin');
+=======
+        // Remove this line:
+        // $this->middleware('admin');
+        
+        // The route already has role middleware, so this is redundant
+>>>>>>> 54ab4ca (Ready for Debugging)
     }
 
     public function index(Request $request)

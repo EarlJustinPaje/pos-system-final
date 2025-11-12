@@ -13,6 +13,7 @@ class Product extends Model
     protected $primaryKey = 'product_id';
 
     protected $fillable = [
+<<<<<<< HEAD
     'tenant_id',
     'branch_id',
     'name',
@@ -38,6 +39,43 @@ protected static function booted()
     });
 }
 
+=======
+        'tenant_id',
+        'branch_id',
+        'barcode',
+        'name',
+        'quantity',
+        'unit',
+        'manufacturer',
+        'price',
+        'capital_price',
+        'markup_percentage',
+        'vat_amount',
+        'price_before_vat',
+        'date_procured',
+        'expiration_date',
+        'manufactured_date',
+        'is_active',
+        'sold_quantity',
+    ];
+
+    protected static function booted()
+    {
+        static::creating(function ($product) {
+            if (auth()->check() && !$product->tenant_id) {
+                $product->tenant_id = auth()->user()->tenant_id;
+                $product->branch_id = auth()->user()->branch_id;
+            }
+            
+            // Auto-calculate prices
+            $product->calculatePrices();
+        });
+
+        static::updating(function ($product) {
+            $product->calculatePrices();
+        });
+    }
+>>>>>>> 54ab4ca (Ready for Debugging)
 
     protected function casts(): array
     {
@@ -49,14 +87,44 @@ protected static function booted()
         ];
     }
 
+<<<<<<< HEAD
     public function saleItems()
     {
         return $this->hasMany(SaleItem::class, 'product_id', 'product_id');
+=======
+    public function calculatePrices()
+    {
+        if ($this->capital_price && $this->markup_percentage) {
+            // Calculate price before VAT
+            $this->price_before_vat = $this->capital_price * (1 + ($this->markup_percentage / 100));
+            
+            // Calculate VAT (12%)
+            $this->vat_amount = $this->price_before_vat * 0.12;
+            
+            // Final selling price (includes VAT)
+            $this->price = $this->price_before_vat + $this->vat_amount;
+        }
+>>>>>>> 54ab4ca (Ready for Debugging)
     }
 
     public function getSellingPriceAttribute()
     {
+<<<<<<< HEAD
         return $this->capital_price * 1.15; // 15% markup
+=======
+        return $this->price;
+    }
+
+    public function getQrCodeAttribute()
+    {
+        return \SimpleSoftwareIO\QrCode\Facades\QrCode::size(200)
+            ->generate($this->barcode);
+    }
+
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class, 'product_id', 'product_id');
+>>>>>>> 54ab4ca (Ready for Debugging)
     }
 
     public function scopeActive($query)
@@ -79,4 +147,12 @@ protected static function booted()
     {
         return $query->orderBy('sold_quantity', 'desc');
     }
+<<<<<<< HEAD
+=======
+
+    public function scopeByBarcode($query, $barcode)
+    {
+        return $query->where('barcode', $barcode);
+    }
+>>>>>>> 54ab4ca (Ready for Debugging)
 }

@@ -7,7 +7,21 @@
         <i class="bi bi-plus-circle me-2"></i>Add Product
     </a>
 </div>
+<<<<<<< HEAD
 
+=======
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Fast Moving Products</h1>
+    <div class="btn-group">
+        <a href="{{ route('products.import') }}" class="btn btn-success btn-lg">
+            <i class="bi bi-file-earmark-excel me-2"></i>Import Excel
+        </a>
+        <a href="{{ route('products.create') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Add Product
+        </a>
+    </div>
+</div>
+>>>>>>> 54ab4ca (Ready for Debugging)
 <div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -52,10 +66,23 @@
                         </td>
                         <td class="py-3 text-center">
                             <div class="btn-group">
+<<<<<<< HEAD
                                 <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 
+=======
+                                <!-- QR Code Button -->
+                                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#qrModal{{ $product->product_id }}">
+                                    <i class="bi bi-qr-code"></i>
+                                </button>
+
+                                <!-- Edit Button -->
+                                <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+>>>>>>> 54ab4ca (Ready for Debugging)
                                 @if($product->is_active)
                                     <form method="POST" action="{{ route('products.deactivate', $product) }}" class="d-inline">
                                         @csrf
@@ -65,7 +92,12 @@
                                         </button>
                                     </form>
                                 @endif
+<<<<<<< HEAD
                                 
+=======
+
+                                <!-- Delete Button -->
+>>>>>>> 54ab4ca (Ready for Debugging)
                                 <form method="POST" action="{{ route('products.destroy', $product) }}" class="d-inline">
                                     @csrf
                                     @method('DELETE')
@@ -77,6 +109,34 @@
                             </div>
                         </td>
                     </tr>
+<<<<<<< HEAD
+=======
+
+                    <!-- QR Code Modal -->
+                    <div class="modal fade" id="qrModal{{ $product->product_id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">{{ $product->name }} - QR Code</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <div class="mb-3">
+                                        {!! $product->qr_code !!}
+                                    </div>
+                                    <p class="mb-2"><strong>Barcode:</strong> {{ $product->barcode }}</p>
+                                    <p class="mb-0"><strong>Price:</strong> ₱{{ number_format($product->selling_price, 2) }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="printQR('qrModal{{ $product->product_id }}')">
+                                        <i class="bi bi-printer"></i> Print
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+>>>>>>> 54ab4ca (Ready for Debugging)
                     @empty
                     <tr>
                         <td colspan="10" class="text-center py-5">
@@ -93,4 +153,23 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 @endsection
+=======
+
+@push('scripts')
+<script>
+function printQR(modalId) {
+    const modal = document.getElementById(modalId);
+    const qrContent = modal.querySelector('.modal-body').innerHTML;
+    const newWindow = window.open('', '', 'width=400,height=500');
+    newWindow.document.write('<html><head><title>Print QR Code</title></head><body>');
+    newWindow.document.write(qrContent);
+    newWindow.document.write('</body></html>');
+    newWindow.document.close();
+    newWindow.print();
+}
+</script>
+@endpush
+@endsection
+>>>>>>> 54ab4ca (Ready for Debugging)

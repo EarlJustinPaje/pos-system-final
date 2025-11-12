@@ -19,8 +19,27 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+<<<<<<< HEAD
         $query = User::query();
         
+=======
+        $user = auth()->user();
+        $query = User::query();
+
+        // Managers can only see cashiers in their branch
+        if ($user->isManager()) {
+            $query->where('branch_id', $user->branch_id)
+                  ->where('role', 'cashier');
+        }
+
+        // Admins see users in their tenant
+        if ($user->isAdmin()) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+
+        // Super Admin sees everyone (no filter needed)
+
+>>>>>>> 54ab4ca (Ready for Debugging)
         if ($request->has('search')) {
             $search = $request->get('search');
             $query->where(function($q) use ($search) {
@@ -29,9 +48,14 @@ class UserController extends Controller
                   ->orWhere('username', 'like', "%{$search}%");
             });
         }
+<<<<<<< HEAD
         
         $users = $query->get();
         
+=======
+
+        $users = $query->get();
+>>>>>>> 54ab4ca (Ready for Debugging)
         return view('users.index', compact('users'));
     }
 
@@ -40,6 +64,10 @@ class UserController extends Controller
         return view('users.show', compact('user'));
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 54ab4ca (Ready for Debugging)
     public function edit(User $user)
     {
         return view('users.edit', compact('user'));
@@ -55,14 +83,20 @@ class UserController extends Controller
 
         $oldValues = $user->toArray();
         $user->update($request->only(['name', 'email', 'username']));
+<<<<<<< HEAD
         
         $this->auditService->log('UPDATE', 'users', $user->id, $oldValues, $user->toArray());
         
+=======
+        $this->auditService->log('UPDATE', 'users', $user->id, $oldValues, $user->toArray());
+
+>>>>>>> 54ab4ca (Ready for Debugging)
         return redirect()->route('users.show', $user)->with('success', 'Profile updated successfully');
     }
 
     public function resetPassword(User $user)
     {
+<<<<<<< HEAD
         $newPassword = 'password123';
         $oldValues = ['password' => $user->password];
         
@@ -70,11 +104,26 @@ class UserController extends Controller
         
         $this->auditService->log('PASSWORD_RESET', 'users', $user->id, $oldValues, ['password' => 'reset']);
         
+=======
+        $authUser = auth()->user();
+        // Only Admins or Super Admins can reset passwords
+        if (!$authUser->isAdmin() && !$authUser->isSuperAdmin()) {
+            abort(403, 'You do not have permission to reset passwords.');
+        }
+
+        $newPassword = 'password123'; // or generate dynamically
+        $oldValues = ['password' => $user->password];
+
+        $user->update(['password' => Hash::make($newPassword)]);
+        $this->auditService->log('PASSWORD_RESET', 'users', $user->id, $oldValues, ['password' => 'reset']);
+
+>>>>>>> 54ab4ca (Ready for Debugging)
         return redirect()->route('users.show', $user)->with('success', "Password reset to: {$newPassword}");
     }
 
     public function deactivate(User $user)
     {
+<<<<<<< HEAD
         $oldValues = $user->toArray();
         $user->update(['is_active' => false]);
         
@@ -83,3 +132,55 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User deactivated successfully');
     }
 }
+=======
+        $authUser = auth()->user();
+
+        // Managers can deactivate only; Admin/Super Admin can deactivate/reactivate
+        if ($authUser->isManager() && $user->role !== 'cashier') {
+            abort(403, 'Managers can only deactivate cashiers.');
+        }
+
+        if (!$authUser->isManager() && !$authUser->isAdmin() && !$authUser->isSuperAdmin()) {
+            abort(403, 'You do not have permission to deactivate accounts.');
+        }
+
+        $oldValues = $user->toArray();
+        $user->update(['is_active' => false]);
+        $this->auditService->log('DEACTIVATE', 'users', $user->id, $oldValues, $user->toArray());
+
+        return redirect()->route('users.index')->with('success', 'User deactivated successfully');
+    }
+
+    public function reactivate(User $user)
+    {
+        $authUser = auth()->user();
+
+        // Only Admin and Super Admin can reactivate
+        if (!$authUser->isAdmin() && !$authUser->isSuperAdmin()) {
+            abort(403, 'You do not have permission to reactivate accounts.');
+        }
+
+        $oldValues = $user->toArray();
+        $user->update(['is_active' => true]);
+        $this->auditService->log('REACTIVATE', 'users', $user->id, $oldValues, $user->toArray());
+
+        return redirect()->route('users.index')->with('success', 'User reactivated successfully');
+    }
+
+    public function destroy(User $user)
+    {
+        $authUser = auth()->user();
+
+        // Only Admin or Super Admin can delete users
+        if (!$authUser->isAdmin() && !$authUser->isSuperAdmin()) {
+            abort(403, 'You do not have permission to delete accounts.');
+        }
+
+        $oldValues = $user->toArray();
+        $user->delete();
+        $this->auditService->log('DELETE', 'users', $user->id, $oldValues, []);
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully');
+    }
+}
+>>>>>>> 54ab4ca (Ready for Debugging)
